@@ -1,2 +1,7 @@
-# 5cardStudProject
-5 Card Stud Game for Comp 3410
+# 5cardStudProject README File
+
+#AUTHORS
+#Kendal Harris
+#Gabriel Sagardia
+#Berkeley Willis
+_________________________________________________
