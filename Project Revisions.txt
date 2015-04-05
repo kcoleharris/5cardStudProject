@@ -1,0 +1,55 @@
+LAST WORKING COPY: v0.2
+LAST CHANGED COPY: V0.2.1
+Things marked with by * indicate descriptions of existing code
+Anything without * indicate explanations of my changes to the code
+__________________________________________________________________________________
+CHANGE1
+*each hand evaluation assigns a value to $t3: highcard ($t3 --> 0)
+					     pair ($t3 --> 1)
+					     TwoPair ($t3 --> 2)
+					     ThreeOfAKind ($t3 -->3)
+					     Straight ($t3 --> 5)
+Therefore the following were added in order to facilitate in comparing hands:
+	FourOfAKind ($t3 -->4)
+	FullHouse ($t3 -->4.5)
+	Flush ($t3 -->6)
+	StraightFlush ($t3 -->7)
+	RoyalFlush ($t3 -->8)
+____________________________________________________________________________________
+CHANGE2
+added an array to store the various player hand types ($t3)
+	line 23 --> storedHands: .word 0:2 #for two player game
+____________________________________________________________________________________
+CHANGE3
+* "b exit" after hand determinations to end the game
+
+This was changed to go store the value associated with the hand type ($t3).
+	CHANGED TO: b storeForComparison
+____________________________________________________________________________________
+CHANGE4
+added code "storeForComparison" (line 355)
+	   "preStoreHandType" (line 522)
+	   "storeHandType" (line 526)
+	   "compareHands" (line 361)
+	   "higherHand" (line 532)
+	   "equalHands" (line 541)
+____________________________________________________________________________________
+NOTE:
+New two player code flow will follow the following outline:
+	------------ROUND LOOP-------------
+	---------PLAYER TURN LOOP----------
+	exchange/keep cards (actaul gameplay)
+	handEvaluation (obtain a $t3 value)
+	storeHandType (store $t3) [loop1 -->store player1$t3 ; loop2 -->store player2$t3]
+		-would continue for 2+ player
+	-------------END PT LOOP-------------	
+	higherHand (compare t3's to determine winner of round)
+
+added comments where loop counters and braching statements should go
+	line 60 -->round loop start
+	line 61 -->player turn loop start
+	line 359 -->add player loop counter
+	line 360 -->player turn loop end
+	line 364 -->add loop round counter 
+	line 365 -->round loop end
+	-------------END R LOOP-------------	
