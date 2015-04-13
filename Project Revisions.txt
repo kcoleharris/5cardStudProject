@@ -53,3 +53,21 @@ added comments where loop counters and braching statements should go
 	line 364 -->add loop round counter 
 	line 365 -->round loop end
 	-------------END R LOOP-------------	
+____________________________________________________________________________________
+____________________________________________________________________________________
+13 April 2015
+
+Started making two player:
+	-added startRound label (LINE 60)
+		*starts the round with the player who won last round
+	-added startNextPlayer label (LINE 63)
+		*switches to next player to finish round
+	-stored upper bound of card index in $s6 (different for each player) [CHECKED LINE 99]
+	-stored lower bound of card index in $s7 (different for each player) [CHECKED LINE 100]
+	-used $t6 to track the players during round (LINES 368/369)
+		*pushed then popped from stack in LINES  139-143, in order to use $t6 for another function
+	-used $t8 to track rounds of game (LINE 376)
+	-added p1stats function to set player 1 information for $s6 and $s7 
+	-added p2stats function to set player 2 information for $s6 and $s7
+	-corrected call to preStoreHandType to be based on value in $t6 (player turn)
+	
