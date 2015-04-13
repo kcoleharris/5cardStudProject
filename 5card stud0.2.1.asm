@@ -17,9 +17,9 @@ invalidInput: .asciiz "That was an invalid choice, possibly not even a number!"
 InvalidNum: .asciiz "That is not an available number!"
 
 #This is where the size of the hand, depending on how many players it will increase by this
-hand: .word 0 : 10
-suitHolder: .word 0 : 10
-exchangeCards: .word 0 : 6
+hand: .word 0 : 20 		#changed from 10 to 20 in order to support two players 
+suitHolder: .word 0 : 20	#changed from 10 to 20 in order to support two players 
+exchangeCards: .word 0 : 6	
 storedHands: .word 0:2		#for two players (size would change depending on number of players)
 
 #This area has each of the possible hands
@@ -55,13 +55,15 @@ jal dealLoop	#Jumps and links to the dealLoop code
 sw $a0, 0($s0)	#After linking back it saves the new card number in the array
 addi $s0, $s0, 4	#Increments the card array
 addi $t0, $t0, 1	#Increments the counter of cards
-blt $t0, 5, saveCard	#Branches if there are still cards that are needed to be created and dealt
+blt $t0, 10, saveCard	#Branches if there are still cards that are needed to be created and dealt
 
-###SHOULD START LOOP OF ROUNDS OF THE 5 CARD STUD GAME###
-###SHOULD START LOOP OF PLAYER TURN IN A SINGLE ROUND###
-addi $s0, $s0, -20	#Needed to readjust where the array is currently indexing at
-li $t4, 5	#Sets up a loop reference to count how many havce passed, need only 5 at the moment
-la $s2, display	#Loads the buffer for use to display the cards
+startRound:	#starts round with winner of next round
+beq $s5,1,p1stats	#set the stats for player 1
+beq $s5,0,p2stats	#set the stats for player 2
+startNextPlayer: #starts next player of current round
+addi $s0, $s0, -40	#Needed to readjust where the array is currently indexing at
+li $t4, 5	#Sets up a loop reference to count how many have passed, need only 5 (per player)
+la $s2, display	#Loads the buffer used to display the cards
 la $s3, exchangeCards	#Sets up the array that will take in the exchanged cards
 li $t0, 0
 jal card #Jumps and links to cards to build a string to be displayed later
@@ -78,9 +80,10 @@ la $t1, 0	#Zeros out $t1 to be used in the loop
 possibleLoop:
 li $v0, 51	#Prompts to put in a dialogue box that takes in an integer
 la $a0, exchangePrompt	#Loads the string that will be printed as a message in the dialogue box
-syscall	#Puts out the dailogue bo
+syscall	#Puts out the dailogue box
+#(HOW MANY WILL BE EXCHANGED)
 bltz $a1, invalidChoice	#If the input character/s changed the status to a non-OK status, branches to invalidChoice for it
-bgt $a0, 3, invalidNum	#If the input integer was greater than 3, it branches to an invalid number handler
+bgt $a0, 3, invalidNum	#If the input integer was greater than 3, it branches to an invalid number handler 
 bltz $a0, invalidNum	#If the input integer was less than 0, it branches to an invalid numer handler
 move $t1, $a0	#Moves the integer to $t1 to be used
 move $t4, $a0	#Moves the same integer to $t4, so it can be used without interfering with the secondary counter
@@ -93,8 +96,8 @@ li $v0, 51	#Prompts a dialogue box to show the user all of their options
 la $a0, exchange	#Loads the message that is to prompt the message
 syscall	#Prompts the message box and gets ready to take in integer input
 bltz $a1, invalidChoice	#If the input character/s changed the status to a non-OK status, branches to invalidChoice for it
-bgt $a0, 5, invalidNum	#If the input integer was greater than 3, it branches to an invalid number handler
-blt $a0, 1,invalidNum	#If the input integer was less than 0, it branches to an invalid numer handler
+bgt $a0, $s6, invalidNum	#If the input integer was greater than the set highest index, it branches to an invalid number handler (CHECK FOR GREATEST NUMBER THEY CAN TRADE)
+blt $a0, $s7,invalidNum	#If the input integer was less than the set lowest indez, it branches to an invalid numer handler (CHECK FOR LEAST VALUE CARD THEY CAN TRADE)
 add $t0, $a0, -1	#Takes the input number and subracts 1 to adjust for it being an array
 sw $t0, 0($s3)	#Stores the number in the discardCard array
 addi $s3, $s3, 4	#Increments the array
@@ -127,14 +130,18 @@ li $v0, 42	#Preps to create a random integer
 li $a1, 51	#Loads the maximum for the random numbers
 li $t0, 5	#Loads 5 for the $t0 to use as a counter in the dealing loops
 newDealLoop:	
-lw $t5, 0($s3)	#Loads the next number inwhich is the position in the array the user wishes to replace with a new card
+lw $t5, 0($s3)	#Loads the next number in, which is the position in the array the user wishes to replace with a new card
 jal dealLoop	#Jumps and links to the dealLoop
 addi $s0, $s0, -20	#After jumping back it decrements the hand array to its original position
 mul $t5, $t5, 4	#Gets the position that the user wants a new card in by taking the number and multiplying by 4
 add $s0, $s0, $t5	#Then it adjusts the array to that position
+addi $sp,$sp,-4	#prepare to push player counter onto stack
+sw $t6,0($sp)	# $t6 being used to store loop counter for player) -->pushed onto stack in order to use $t6 here
 lw $t6, 0($s0)	#Loads the word into $t6
 sw $t5, 0($s0)	#Saves the new card into the hand array
 sw $t6, 0($s3)	#Saves the old card in the discardCardArray
+lw $t6,0($sp)	#get value of player turn back
+addi $sp,$sp,4	#return stack to original position
 sub $s0, $s0, $t5	#Readjusts the array back from the altering position to the original position
 addi $s0, $s0, 20	#Adjusts the array all the way to the end
 addi $s3, $s3, 4	#Increments the array to its new position
@@ -200,6 +207,7 @@ add $s0, $s0, $t4	#Decrements the face value array to the starting position
 add $s1, $s1, $t4	#Decrements the suit value array to the starting position
 la $t4, 0	#Zeros out counter for loop
 j sort	#Jumps back to sort
+# END OF EXCHANGE SECTION
 
 #EVALUATION OF PLAYER HAND TYPES
 #After the sort is done and hand evaluation is going to take place, label is there to break from sorting loops
@@ -328,7 +336,7 @@ b storeForComparison
 
 fullHouse:
 la $a1, FullHouse
-li $t3,4.5
+li $t3,10
 b storeForComparison
 #b exit
 
@@ -353,14 +361,19 @@ b storeForComparison
 
 #STORE HAND TYPES FOR COMPARISON--for multi player games
 storeForComparison:
-addi $t7,$0,1	#Tracks how many times playerCompare has been visited
-beq $t7,1 preStoreHandType	#if first time go to preStoreHandType to set up the hand type array
+#addi $t7,$0,1	#Tracks how many times playerCompare has been visited
+#beq $t7,1 preStoreHandType	#if first time go to preStoreHandType to set up the hand type array
 jal storeHandType #go directly to store player hand types if not the type to be stored
-#restart inner loop for second player's turn...
+###JUMP BACK TO BEGINNING FOR SECOND PLAYER
+addi $t6,$t6,1	#add one to player tracker
+beq $t6,3,compareHands #both players have 
+beq $s5,0,p2stats #if player one finished, load player 2 data
+beq $s5,1,p1stats #if player two finished, load player 1 data
+b startNewPlayer #branch back and start new players turn
 ###SHOULD END LOOP OF PLAYER TURN IN SINGLE ROUND###
 compareHands:
 jal higherHand
-
+blt $t8,5,startRound
 #restart outerloop with winner of last round
 ##SHOULD END LOOP OF ROUNDS IN THE 5 CARD STUD GAME###
 
@@ -514,11 +527,21 @@ skipDiscardCards:	#Section to skip to if this isn't the discard phase
 jr $ra	#Jumps back to the jal that it was called from
 
 ###################################################################################################################################
-## ADDED TO COMPARE PLAYER HANDS ##
-## Runs each time a hand type is assigned##
-## avoid accidentally having a left over number that may accidently trigger a branch where it shouldn't, and compare to the same ##
-## $t1 where the value is. When it branches, it jumps down to where the label next to it is and prints the card.		 ##
+## MULTI PLAYER SUPPORT ##
+## ADDED TO SUPPORT A SECOND PLAYER ##
 ###################################################################################################################################
+#STATS SET IF PLAYER 1 STARTS THE ROUND
+p1stats:
+li $s6,5 #greatest index in hand array player 1 can choose
+li $s7,1 #lowest index in hand array player 1 can choose 
+jr $ra
+
+#STATS SET IF PLAYER 2 STARTS THE ROUND
+p2stats:
+li $s6,10 #greatest index in hand array player 2 can choose
+li $s7,6 #lowest index in hand array player 2 can choose 
+jr $ra
+
 preStoreHandType:
 la $s4,storedHands	#create array to compare the hands in $s4
 jr $ra
@@ -530,20 +553,20 @@ addi $s4,$s4,1	#increment to next word in $s4 (for next storage)
 jr $ra #jump back to determine next player hand type
 
 higherHand:
-add $s4,$s4,$t6 #return to beginning of stored hand types ($t6 stores how many times items were stored in the array)
+#add $s4,$s4,$t6 #return to beginning of stored hand types ($t6 stores how many times items were stored in the array)
 lw $t6,0($s4) #load player1 hand type
 addi $s4,$s4,1 #progress to player two's handtype
 lw $t7,0($s4) #load player2 hand type
 beq $t6,$t7,equalHands
 slt $t8,$t6,$t7 #determines which hand is higher ($t8 =1 means player 1 won, $t8 = 0 means player 2 won). This condition needs to be checked to see who plays first next round
-	
+move $s5,$t8 	#move who won to $s5 --> used as condition for who starts next round	
 	#handles hand type ties (finds highest face value of cards)
 	equalHands:beqz $t6,bothHigh
 		   beq $t6,1,bothPair
 		   beq $t6,2,bothTwoPair
 		   beq $t6,3,bothThreeKind
 		   beq $t6,4,bothFourKind
-		   beq $t6,4.5,bothFullHouse
+		   beq $t6,10,bothFullHouse
 		   beq $t6,5,bothStraight
 		   beq $t6,6,bothFlush
 		   beq $t6,7,bothStraightFlush
