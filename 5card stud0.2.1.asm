@@ -338,7 +338,6 @@ fullHouse:
 la $a1, FullHouse
 li $t3,10
 b storeForComparison
-#b exit
 
 fourOfaKind:
 la $a1, FourOfAKind
@@ -361,21 +360,20 @@ b storeForComparison
 
 #STORE HAND TYPES FOR COMPARISON--for multi player games
 storeForComparison:
-#addi $t7,$0,1	#Tracks how many times playerCompare has been visited
-#beq $t7,1 preStoreHandType	#if first time go to preStoreHandType to set up the hand type array
+beq $t6,1 preStoreHandType	#if first players turn, go to preStoreHandType to set up the hand type array
 jal storeHandType #go directly to store player hand types if not the type to be stored
-###JUMP BACK TO BEGINNING FOR SECOND PLAYER
+switchPlayer:
+###switch to next player before starting next round
 addi $t6,$t6,1	#add one to player tracker
-beq $t6,3,compareHands #both players have 
+beq $t6,3,compareHands #both players have completed their turns, skip down to compare the hands
 beq $s5,0,p2stats #if player one finished, load player 2 data
 beq $s5,1,p1stats #if player two finished, load player 1 data
-b startNewPlayer #branch back and start new players turn
-###SHOULD END LOOP OF PLAYER TURN IN SINGLE ROUND###
+###END OF PLAYER LOOP IN SINGLE ROUND###
 compareHands:
 jal higherHand
 blt $t8,5,startRound
-#restart outerloop with winner of last round
-##SHOULD END LOOP OF ROUNDS IN THE 5 CARD STUD GAME###
+#start next round with winner of last round
+##END OF ROUND LOOP IN THE 5 CARD STUD GAME###
 
 #This last bit is for exiting out of the program
 exit:
@@ -534,23 +532,23 @@ jr $ra	#Jumps back to the jal that it was called from
 p1stats:
 li $s6,5 #greatest index in hand array player 1 can choose
 li $s7,1 #lowest index in hand array player 1 can choose 
-jr $ra
+j startNextPlayer
 
 #STATS SET IF PLAYER 2 STARTS THE ROUND
 p2stats:
 li $s6,10 #greatest index in hand array player 2 can choose
 li $s7,6 #lowest index in hand array player 2 can choose 
-jr $ra
+j startNextPlayer
 
 preStoreHandType:
 la $s4,storedHands	#create array to compare the hands in $s4
-jr $ra
+j storedHandType
 
 storeHandType:
 sw $t3,0($s4) #store player hand type in compareHand array
 addi $t6,$0,1 #track how many times items were stored
 addi $s4,$s4,1	#increment to next word in $s4 (for next storage)
-jr $ra #jump back to determine next player hand type
+j switchPlayer #jump back to start next players turn (need to determine next player hand type)
 
 higherHand:
 #add $s4,$s4,$t6 #return to beginning of stored hand types ($t6 stores how many times items were stored in the array)
