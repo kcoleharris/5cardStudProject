@@ -1,3 +1,63 @@
+14 APRIL 2015
+NEW VERSION: 5-card draw
+		*UNTESTED ON MULTIPLAYER*
+		*COMPARISON ALGORITHMS WRITTEN*
+*changed name of project to 5 card draw
+*modified working version of 5-card stud (v0.2)
+
+-added 2 arrays: HANDTYPE ($s4) --> holds the hand classification of each player [LINE 211]
+		 HIGHVALUE ($s5) --> holds the highest value of the type for each player [LINE 212]
+ [LINES 231-236]
+-stored highest values of $t2 in $s5 (FOR PAIRS)
+	*if any new value placed in $t2, check it against what was saved in the highValue array
+	*if greater then replace, if not then take no action
+
+ [LINES 247-252]
+-stored highest values of $t2 in $s5 (FOR TWO PAIRS) (THIS VALUE IS ALSO USED FOR 3OFKIND AND 4OFKIND)
+	*if any new value placed in $t2, check it against what was saved in the highValue array
+	*if greater then replace, if not then take no action
+
+-each hand type has the following rankings:
+	ROYAL FLUSH --> 10
+	STRAIGHT FLUSH -->9
+	FOUR OF KIND -->8
+	FULL HOUSE -->7
+	FLUSH -->6
+	STRAIGHT -->5
+	THREE OF KIND -->3
+	TWO PAIR -->2
+	PAIR -->1
+	HIGH -->0
+
+-for each type of hand save the value of $t3 (hand type) into $s4 (handType array)
+-EACH SECTION FOR EACH HAND TYPE SHOULD BRANCH TO THE HIGHER HAND SECTION INSTEAD OF EXIT
+
+-higherHand: compares based on hand type
+		compares based on face value (if hand type ties)
+			compares based on suit value (if face values tie)
+				*ONLY PART NOT COMPLETED (HOW DO YOU THINK WE SHOULD GO ABOUT TRACKING SUIT VALUES AS WELL?
+				*WE COULD STORE THEM IN THE SAME ARRAY RIGHT NEXT TO THE FACE VALUE...
+-player1Win (COMMENTED OUT) --> sets stats for player 1 to start next round (you can do whatever you need to to this)
+-player2win (COMMENTED OUT) --> sets stats for player 2 to start next round (you can do whatever you need to to this)
+______________________________________________________________________________________
+______________________________________________________________________________________
+13 April 2015
+
+Started making two player:
+	-added startRound label (LINE 60)
+		*starts the round with the player who won last round
+	-added startNextPlayer label (LINE 63)
+		*switches to next player to finish round
+	-stored upper bound of card index in $s6 (different for each player) [CHECKED LINE 99]
+	-stored lower bound of card index in $s7 (different for each player) [CHECKED LINE 100]
+	-used $t6 to track the players during round (LINES 368/369)
+		*pushed then popped from stack in LINES  139-143, in order to use $t6 for another function
+	-used $t8 to track rounds of game (LINE 376)
+	-added p1stats function to set player 1 information for $s6 and $s7 
+	-added p2stats function to set player 2 information for $s6 and $s7
+	-corrected call to preStoreHandType to be based on value in $t6 (player turn)
+______________________________________________________________________________________
+______________________________________________________________________________________
 LAST WORKING COPY: v0.2
 LAST CHANGED COPY: V0.2.1
 Things marked with by * indicate descriptions of existing code
@@ -55,19 +115,3 @@ added comments where loop counters and braching statements should go
 	-------------END R LOOP-------------	
 ____________________________________________________________________________________
 ____________________________________________________________________________________
-13 April 2015
-
-Started making two player:
-	-added startRound label (LINE 60)
-		*starts the round with the player who won last round
-	-added startNextPlayer label (LINE 63)
-		*switches to next player to finish round
-	-stored upper bound of card index in $s6 (different for each player) [CHECKED LINE 99]
-	-stored lower bound of card index in $s7 (different for each player) [CHECKED LINE 100]
-	-used $t6 to track the players during round (LINES 368/369)
-		*pushed then popped from stack in LINES  139-143, in order to use $t6 for another function
-	-used $t8 to track rounds of game (LINE 376)
-	-added p1stats function to set player 1 information for $s6 and $s7 
-	-added p2stats function to set player 2 information for $s6 and $s7
-	-corrected call to preStoreHandType to be based on value in $t6 (player turn)
-	
