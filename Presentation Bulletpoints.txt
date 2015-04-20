@@ -1,0 +1,21 @@
+Introduction
+	NAME CHANGE --> 5 CARD DRAW
+
+*Demonstration*
+
+Discussion
+	differences: 
+		all five cards are dealt out, with the option of trading up to 3 in
+		(OLD WAY: deal out one by one, then bet after each round. NO OPTION to trade)
+
+	technical approach:
+		Explain how each of the following works:
+		-AI overview
+		-deal hand
+		-trade in
+		-compare two hands
+
+	various changes:
+		from multi-player to AI
+
+*Questions*
