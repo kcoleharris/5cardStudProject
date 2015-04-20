@@ -569,7 +569,8 @@ move $s5,$t8 	#move who won to $s5 --> used as condition for who starts next rou
 		   beq $t6,6,bothFlush
 		   beq $t6,7,bothStraightFlush
 		   beq $t6,8,bothRoyalFlush
-		   
+		
+	#these methods check for highest card value  
 	bothHigh:
 	
 	bothPair:
