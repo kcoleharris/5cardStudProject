@@ -536,8 +536,9 @@ skipDiscardCards:	#Section to skip to if this isn't the discard phase
 jr $ra	#Jumps back to the jal that it was called from
 
 ###################################################################################################################################
-## MULTI PLAYER SUPPORT ##
+## COMPARISON ALGORITHMS ##
 ## ADDED TO SUPPORT A SECOND PLAYER ##
+## NEEDED TO CHECK WHO WON BETWEEN TWO PLAYER'S HANDS ##
 ###################################################################################################################################
 
 #DETERMINE THE HIGHEST HAND BETWEEN TWO PLAYERS
